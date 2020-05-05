@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-# from google.oauth2 import service_account
+from django.conf.locale.en import formats as en_formats
+from google.oauth2 import service_account
 import logging.config
 from django.utils.log import DEFAULT_LOGGING
 
@@ -148,7 +149,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'ko-KR'
+LANGUAGE_CODE = 'ko-kr'
 
 TIME_ZONE = 'Asia/Seoul'
 
@@ -158,21 +159,37 @@ USE_L10N = True
 
 USE_TZ = True
 
+DATE_FORMAT = 'Y-m-d'
+
+DATETIME_FORMAT = 'Y-m-d G:i:s'
+
+DATE_INPUT_FORMATS = (
+    '%Y-%m-%d',
+)
+TIME_INPUT_FORMATS = (
+    '%H:%M:%S',
+)
+DATETIME_INPUT_FORMATS = (
+    '%Y-%m-% %H:%M:%S',
+)
+
+en_formats.DATETIME_FORMAT = 'Y-m-d G:i:s.u'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-# Local storage
-STATIC_URL = '/static/'
-STATIC_DIR = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = [
-    STATIC_DIR,
-]
-STATIC_ROOT = os.path.join(BASE_DIR, '.static')
-
-# # Uncomment using cloud storage
+# # Local storage
+# STATIC_URL = '/static/'
 # STATIC_DIR = os.path.join(BASE_DIR, 'static')
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATICFILES_DIRS = [
+#     STATIC_DIR,
+# ]
+# STATIC_ROOT = os.path.join(BASE_DIR, '.static')
+
+# Uncomment using cloud storage
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 # https://blog.jun2.org/development/2019/07/23/django-security-options.html
@@ -334,12 +351,12 @@ GCP_USE_SERVICE_ACCOUNT_JSON = True
 
 STORAGE_DOMAIN = "https://storage.cloud.google.com/apoweroftrance-media"
 
-# GS_CREDENTIALS = service_account.Credentials.from_service_account_file(GCP_SERVICE_ACCOUNT_JSON)
-# DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-# STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-# GS_BUCKET_NAME = "apoweroftrance-static"
-#
-# STATIC_URL = "https://storage.cloud.google.com/apoweroftrance-static/"
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(GCP_SERVICE_ACCOUNT_JSON)
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = "apoweroftrance-static"
+
+STATIC_URL = "https://storage.cloud.google.com/apoweroftrance-static/"
 
 
 #####################

@@ -294,7 +294,7 @@ class TrackInline(admin.StackedInline):
 @admin.register(PlayHistory)
 class PlayHistoryAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'track_link', 'channel', 'artist', 'title', 'played_at',
+        'id', 'channel', 'artist', 'title', 'played_at',
     )
     search_fields = (
         'artist', 'title'
