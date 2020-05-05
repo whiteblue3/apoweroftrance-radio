@@ -58,17 +58,12 @@ RUN chown -R ${USER}:${USER} /backend
 COPY ./startup.sh /backend/startup.sh
 RUN chmod a+x /backend/startup.sh
 
+# it uses for gcs cloud storage
 ENV GOOGLE_APPLICATION_CREDENTIALS /etc/gcloud/service-account-key.json
 
 RUN mkdir -p /etc/gcloud
 
-ENV STAGE 'dev'
-ENV SECRET_KEY = ''
-ENV JWT_SECRET_KEY = ''
-ENV AES_KEY = ''
-ENV AES_SECRET = ''
-ENV EMAIL_HOST_USER = ''
-ENV EMAIL_HOST_PASSWORD = ''
+ENV ENABLE_SWAGGER 1
 
 ENV DB_NAME 'apoweroftrance'
 ENV DB_HOST '127.0.0.1'
@@ -80,18 +75,36 @@ ENV REDIS_URL "127.0.0.1"
 ENV REDIS_PORT 6379
 ENV REDIS_DB 0
 
-USER ${USER}
+###########################
+# service depends control #
+
+# if 1, wait to start the depends service is up
+ENV WAIT_SERVICE 0
+ENV WAIT_URL "127.0.0.1"
+ENV WAIT_PORT 5432
+
+###################
+# startup control #
+
+# pip install when start (dev usally)
+ENV INSTALL 0
+
+# pip makemigrations and migrate (dev usally)
+ENV MIGRATE 0
+
+# automatic start django
+ENV AUTOSTART 1
 
 
+## Uncommend when production
 #FROM deploy AS production
 #MAINTAINER @whiteblue3 https://github.com/whiteblue3
-#
 #COPY . /backend/
-#RUN python3 manage.py collectstatic --noinput -i yes \
-#    && python3 manage.py migrate --noinput \
-#    && python3 manage.py makemigrations accounts \
-#    && python3 manage.py makemigrations radio \
-#    && python3 manage.py migrate
+#RUN chown -R ${USER}:${USER} /backend
+#RUN rm requirement.txt && rm Dockerfile && rm build_push_docker_image.sh && rm -rf .git && rm -rf .gitignore \
+#    && rm apoweroftrance-django-utils-0.0.1.tar.gz && rm apoweroftrance-account-0.0.1.tar.gz \
+#    && rm -rf radio/migrations
 
 
+USER ${USER}
 ENTRYPOINT ["./startup.sh"]
