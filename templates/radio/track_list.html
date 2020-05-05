@@ -1,0 +1,236 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}">
+  {% if cl.formset %}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
+  {% endif %}
+  {% if cl.formset or action_form %}
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+  {% endif %}
+  {{ media.css }}
+  {% if not actions_on_top and not actions_on_bottom %}
+    <style>
+      #changelist table thead th:first-child {width: inherit}
+    </style>
+  {% endif %}
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.4/utils/Draggable.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+
+  <style type="text/css">
+    .music-row{ cursor: pointer; height: 30px; }
+    .sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+    .sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
+    .sortable li span { position: absolute; margin-left: -1.3em; }
+  </style>
+
+  <script type="text/javascript">
+    var nowplaying = null;
+    var playlist = null;
+    var playlist_data = {};
+
+    var protocol = '{{http_protocol}}';
+    var domain = '{{domain_url}}';
+
+    var interval_id = null;
+
+    function updateData(channel) {
+      $.getJSON(protocol + '://' + domain + '/v1/radio/playqueue/nowplaying/' + channel, function(data) {
+        if(data.length == 0 || !data.payload) {
+          nowplaying = null;
+          var dv = document.getElementById('nowplaying_' + channel);
+          dv.innerHTML = '';
+        } else {
+          nowplaying = data.payload;
+          var dv = document.getElementById('nowplaying_' + channel);
+          dv.innerHTML = '<li class="ui-state-default">' + nowplaying["artist"] + ' - ' + nowplaying["title"] + '</li>';
+        }
+      });
+
+      $.getJSON(protocol + '://' + domain + '/v1/radio/playqueue?channel=' + channel + '&page=0&limit=30', function(data) {
+        playlist = new Array();
+        playlist_data[channel] = new Array();
+
+        if(data.payload != null) {
+          $.each(data.payload, function(i,item) {
+            playlist_data[channel].push(item);
+            playlist.push( item["artist"] + ' - ' + item["title"] );
+          });
+        }
+
+        update_playlist('playlist_' + channel, playlist, channel);
+      });
+    }
+
+    function update_playlist(id, data, channel) {
+      //Add the data rows.
+      innerHTML = '';
+      for (var i = 0; i < data.length; i++) {
+        removeAPI = protocol + '://' + domain + '/admin/radio/track/' + channel + '/' + i + '/queueout';
+
+        var a = document.createElement('a');
+        var text = document.createTextNode("Remove");
+        a.appendChild(text);
+        a.title = "Remove";
+        a.href = removeAPI;
+        a.classList.add('button');
+
+        innerHTML += '<li class="ui-state-default">' + a.outerHTML + '&nbsp;|&nbsp;' + data[i] + '</li>';
+      }
+
+      var dv = document.getElementById(id);
+      dv.innerHTML = innerHTML;
+
+      $("#" + id).sortable({
+        start: function (e, ui) {
+          $(this).attr('data-previndex', ui.item.index());
+          clearInterval(interval_id);
+        },
+        update: function(e, ui) {
+          // gets the new and old index then removes the temporary attribute
+          var newIndex = ui.item.index();
+          var oldIndex = $(this).attr('data-previndex');
+          var element_id = ui.item.attr('id');
+
+<!--          alert('id of Item moved = '+element_id+' old position = '+oldIndex+' new position = '+newIndex);-->
+
+          var item = playlist_data[channel].splice(oldIndex, 1);
+          playlist_data[channel].splice(newIndex, 0, item[0]);
+
+          $.getJSON(protocol + '://' + domain + '/v1/radio/playqueue/move/' + channel + '/' + oldIndex + '/' + newIndex, function(data) {
+            start_update();
+          });
+          $(this).removeAttr('data-previndex');
+        }
+      });
+    }
+
+    function show_playlist(id) {
+      var dv = document.getElementById(id);
+      dv.style.display=(dv.style.display=='block') ? 'none' : 'block';
+    }
+
+    function start_update() {
+      interval_id = setInterval(function(){
+        {% for channel, channelname in channels %}
+          updateData('{{channel}}');
+        {% endfor %}
+      }, 3000);
+    }
+
+    {% for channel, channelname in channels %}
+      updateData('{{channel}}');
+    {% endfor %}
+
+    $(document).ready(function() {
+      start_update();
+    });
+  </script>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+{{ media.js }}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-list{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=cl.opts.app_label %}">{{ cl.opts.app_config.verbose_name }}</a>
+&rsaquo; {{ cl.opts.verbose_name_plural|capfirst }}
+</div>
+{% endblock %}
+{% endif %}
+
+{% block coltype %}flex{% endblock %}
+
+{% block content %}
+  <div id="content-main">
+    {% block object-tools %}
+        <ul class="object-tools">
+          {% block object-tools-items %}
+            {% if has_add_permission %}
+            <li style="display: flex; align-items: center;">
+              {% url cl.opts|admin_urlname:'add' as add_url %}
+              <a href="{% add_preserved_filters add_url is_popup to_field %}" class="addlink">
+                {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
+              </a>
+            </li>
+            {% endif %}
+
+            {% for channel, channelname in channels %}
+            <li style="display: flex; align-items: center;">{{channelname}}</li>
+            <li style="display: flex; align-items: center;">
+              <a href="javascript:show_playlist('channel_{{channel}}');">Playlist</a>
+            </li>
+            <li style="display: flex; align-items: center;">
+              {% url 'admin:track-reset' channel as reset_url %}
+              <a href="{{reset_url}}" class="button">
+                Reset
+              </a>
+            </li>
+            {% endfor %}
+          {% endblock %}
+        </ul>
+    {% endblock %}
+    {% if cl.formset and cl.formset.errors %}
+        <p class="errornote">
+        {% if cl.formset.total_error_count == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+        </p>
+        {{ cl.formset.non_form_errors }}
+    {% endif %}
+
+    <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
+      {% for channel, channelname in channels %}
+        {% block playlist_{{channel}} %}
+          <div id="channel_{{channel}}" class="table-wrapper panel panel-default responsive-table xfull" style="display: none;">
+            <div id="channel_name" class="panel-heading">
+              <center>
+                  {{channelname}}
+              </center>
+            </div>
+            <h4 class="panel-heading">Now Playing</h4>
+            <ul id="nowplaying_{{channel}}"></ul>
+            <h4 class="panel-heading">Playlist</h4>
+            <ul id="playlist_{{channel}}"></ul>
+          </div>
+        {% endblock %}
+      {% endfor %}
+
+      {% block search %}{% search_form cl %}{% endblock %}
+      {% block date_hierarchy %}{% if cl.date_hierarchy %}{% date_hierarchy cl %}{% endif %}{% endblock %}
+
+      {% block filters %}
+        {% if cl.has_filters %}
+          <div id="changelist-filter">
+            <h2>{% trans 'Filter' %}</h2>
+            {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
+          </div>
+        {% endif %}
+      {% endblock %}
+
+      <form id="changelist-form" method="post"{% if cl.formset and cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
+      {% if cl.formset %}
+        <div>{{ cl.formset.management_form }}</div>
+      {% endif %}
+
+      {% block result_list %}
+          {% if action_form and actions_on_top and cl.show_admin_actions %}{% admin_actions %}{% endif %}
+          {% result_list cl %}
+          {% if action_form and actions_on_bottom and cl.show_admin_actions %}{% admin_actions %}{% endif %}
+      {% endblock %}
+      {% block pagination %}{% pagination cl %}{% endblock %}
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,32 @@
+django>=2.0,<3.0
+
+django-admin-rangefilter
+django-admin-list-filter-dropdown
+django-admin-numeric-filter
+django-monthfield
+
+django-pgcrypto
+
+aiohttp
+redis
+
+./apoweroftrance-account-0.0.1.tar.gz
+./apoweroftrance-django-utils-0.0.1.tar.gz
+
+# RESTful API
+djangorestframework
+
+# Swagger 2.0
+drf-yasg
+
+# Database
+psycopg2-binary
+
+# JWT
+pyjwt
+
+# AES
+pycrypto
+
+# Audio Tag
+mutagen
