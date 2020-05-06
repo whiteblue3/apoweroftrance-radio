@@ -12,3 +12,4 @@ You must define secret.json for security
 - GCP_PROJECT_ID: google cloud project id
 - GCP_STORAGE_BUCKET_NAME: bucket name of google cloud storage for media
 - GS_BUCKET_NAME: bucket name of google cloud storage for static
+
