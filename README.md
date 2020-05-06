@@ -9,3 +9,6 @@ You must define secret.json for security
 - AES_SECRET: 16 bit AES256 key
 - EMAIL_HOST_USER: use for sending email
 - EMAIL_HOST_PASSWORD: send email account's password
+- GCP_PROJECT_ID: google cloud project id
+- GCP_STORAGE_BUCKET_NAME: bucket name of google cloud storage for media
+- GS_BUCKET_NAME: bucket name of google cloud storage for static

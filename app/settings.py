@@ -348,19 +348,19 @@ SWAGGER_SETTINGS = {
 # Google Cloud Storage Setup #
 ##############################
 
-GCP_PROJECT_ID = "apoweroftrance"
-GCP_STORAGE_BUCKET_NAME = "apoweroftrance-media"
+GCP_PROJECT_ID = secret['GCP_PROJECT_ID']
+GCP_STORAGE_BUCKET_NAME = secret['GCP_STORAGE_BUCKET_NAME']
 GCP_SERVICE_ACCOUNT_JSON = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
 GCP_USE_SERVICE_ACCOUNT_JSON = True
 
-STORAGE_DOMAIN = "https://storage.cloud.google.com/apoweroftrance-media"
+STORAGE_DOMAIN = "https://storage.cloud.google.com/%s" % GCP_STORAGE_BUCKET_NAME
 
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(GCP_SERVICE_ACCOUNT_JSON)
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = "apoweroftrance-static"
+GS_BUCKET_NAME = secret['GS_BUCKET_NAME']
 
-STATIC_URL = "https://storage.cloud.google.com/apoweroftrance-static/"
+STATIC_URL = "https://storage.cloud.google.com/%s/" % GS_BUCKET_NAME
 
 
 #####################
