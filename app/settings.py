@@ -183,17 +183,17 @@ en_formats.DATETIME_FORMAT = 'Y-m-d G:i:s.u'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-# # Local storage
-# STATIC_URL = '/static/'
-# STATIC_DIR = os.path.join(BASE_DIR, 'static')
-# STATICFILES_DIRS = [
-#     STATIC_DIR,
-# ]
-# STATIC_ROOT = os.path.join(BASE_DIR, '.static')
-
-# Uncomment using cloud storage
+# Local storage
+STATIC_URL = '/static/'
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [
+    STATIC_DIR,
+]
+STATIC_ROOT = os.path.join(BASE_DIR, '.static')
+
+# # Uncomment using cloud storage
+# STATIC_DIR = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 # https://blog.jun2.org/development/2019/07/23/django-security-options.html
@@ -355,12 +355,12 @@ GCP_USE_SERVICE_ACCOUNT_JSON = True
 
 STORAGE_DOMAIN = "https://storage.cloud.google.com/%s" % GCP_STORAGE_BUCKET_NAME
 
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(GCP_SERVICE_ACCOUNT_JSON)
-DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = secret['GS_BUCKET_NAME']
-
-STATIC_URL = "https://storage.cloud.google.com/%s/" % GS_BUCKET_NAME
+# GS_CREDENTIALS = service_account.Credentials.from_service_account_file(GCP_SERVICE_ACCOUNT_JSON)
+# DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+# STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+# GS_BUCKET_NAME = secret['GS_BUCKET_NAME']
+#
+# STATIC_URL = "https://storage.cloud.google.com/%s/" % GS_BUCKET_NAME
 
 
 #####################
@@ -372,6 +372,12 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 51200000
 DATA_UPLOAD_MAX_MEMORY_SIZE = 51200000
 
 STORAGE_DRIVER = "gcs"
+
+FILE_UPLOAD_HANDLERS = (
+    "radio.uploadhandler.ProgressBarUploadHandler",
+    "django.core.files.uploadhandler.MemoryFileUploadHandler",
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+)
 
 
 #############

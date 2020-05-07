@@ -10,6 +10,8 @@ django-pgcrypto
 aiohttp
 redis
 
+django-redis
+
 ./apoweroftrance-account-0.0.1.tar.gz
 ./apoweroftrance-django-utils-0.0.1.tar.gz
 

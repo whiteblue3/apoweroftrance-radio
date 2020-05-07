@@ -16,6 +16,7 @@ from django.contrib.admin.filters import SimpleListFilter
 from .models import Track, PlayHistory, CHANNEL
 from .forms import UploadTrackForm, UpdateTrackForm
 from .util import get_redis_data, set_redis_data, delete_track, get_random_track, NUM_SAMPLES
+from .uploadhandler import ProgressBarUploadHandler
 from django_utils import api
 
 
@@ -64,6 +65,8 @@ class TrackAdmin(admin.ModelAdmin):
     add_form = UploadTrackForm
     change_form = UpdateTrackForm
 
+    add_form_template = "radio/change_form.html"
+
     list_display = (
         'id', 'user_link',
         'format', 'is_service',
@@ -82,7 +85,6 @@ class TrackAdmin(admin.ModelAdmin):
         ('uploaded_at', DateTimeRangeFilter), ('updated_at', DateTimeRangeFilter),
     )
     ordering = ('-id',)
-    actions = ['delete_model']
 
     def user_link(self, obj):
         User = get_user_model()
@@ -108,6 +110,7 @@ class TrackAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         if not obj:
             self.form = self.add_form
+            request.upload_handler = [ProgressBarUploadHandler(request)]
         else:
             self.form = self.change_form
         self.form.user = request.user

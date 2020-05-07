@@ -21,6 +21,7 @@ from django.urls import path, re_path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from radio.views import upload_progress
 
 
 admin.site.site_header = "A Power of Trance"
@@ -51,6 +52,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    re_path(r'^upload_progress/?', upload_progress, name="upload_progress"),
 ] + schema_url_patterns + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if os.environ.get('ENABLE_SWAGGER') == '1':

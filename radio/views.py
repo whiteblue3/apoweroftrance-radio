@@ -1,8 +1,12 @@
+import json
 from datetime import datetime, timedelta
+from django.core.cache import cache
 from django.conf import settings
+from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.cache import never_cache
 from django.db import transaction
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
@@ -30,6 +34,25 @@ from .serializers import (
     PlayQueueSerializer, PlayHistorySerializer
 )
 from .util import now, get_random_track, get_redis_data, set_redis_data, delete_track, NUM_SAMPLES
+
+
+@never_cache
+def upload_progress(request):
+    """
+    Used by Ajax calls
+    Return the upload progress and total length values
+    """
+    if 'X-Progress-ID' in request.GET:
+        progress_id = request.GET['X-Progress-ID']
+    elif 'X-Progress-ID' in request.META:
+        progress_id = request.META['X-Progress-ID']
+    else:
+        progress_id = None
+
+    if progress_id:
+        cache_key = "%s_%s" % (request.META['REMOTE_ADDR'], progress_id)
+        data = cache.get(cache_key)
+        return HttpResponse(json.dumps(data))
 
 
 class TrackListAPI(RetrieveAPIView):
