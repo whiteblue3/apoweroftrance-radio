@@ -450,8 +450,7 @@ RESET_PASSWORD_EMAIL_BODY = "회원님 안녕하세요.\n" \
                             "※ 회원님께서 위의 링크를 클릭하지 않으면 임시비밀번호는 최종 변경되지 않습니다.\n" \
                             "※ 회원님께서 재설정 요청을 하지 않은 경우 아무런 조치를 취하실 필요가 없습니다.\n" \
                             "※ 해당 메일은 답장 하실 수 없습니다. 궁금한 점이 있다면, 아래로 문의해 주시기 바랍니다.\n" \
-                            "- 문의 번호 : 010-6646-5931\n" \
-                            "- 문의 메일 : hd2dj07@gmail.com\n" \
+                            "- 문의 메일 : apoweroftrance@gmail.com\n" \
                             "\n" \
                             "감사합니다\n"
 RESET_PASSWORD_EMAIL_HTML = "<!DOCTYPE html><html lang='kr'><body>회원님 안녕하세요.<br />" \
@@ -465,8 +464,7 @@ RESET_PASSWORD_EMAIL_HTML = "<!DOCTYPE html><html lang='kr'><body>회원님 안�
                             "※ 회원님께서 위의 링크를 클릭하지 않으면 임시비밀번호는 최종 변경되지 않습니다.<br />" \
                             "※ 회원님께서 재설정 요청을 하지 않은 경우 아무런 조치를 취하실 필요가 없습니다.<br />" \
                             "※ 해당 메일은 답장 하실 수 없습니다. 궁금한 점이 있다면, 아래로 문의해 주시기 바랍니다.<br />" \
-                            "- 문의 번호 : 010-6646-55931<br />" \
-                            "- 문의 메일 : hd2dj07@gmail.com<br />" \
+                            "- 문의 메일 : apoweroftrance@gmail.com<br />" \
                             "<br />" \
                             "<br />" \
                             "감사합니다</body></html>"
