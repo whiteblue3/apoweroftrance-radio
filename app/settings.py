@@ -394,7 +394,7 @@ AES_SECRET = secret['AES_SECRET']
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_PORT = 465
 EMAIL_HOST_USER = secret['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = secret['EMAIL_HOST_PASSWORD']
 EMAIL_USE_TLS = True
@@ -501,7 +501,7 @@ NOTIFY_SECURITY_ALERT_EMAIL_HTML = "<!DOCTYPE html><html lang='kr'><body>" \
                                    "위의 링크를 클릭하여 임시비밀번호로 변경하신 후에는 반드시 비밀번호를 원하는 비밀번호로 변경해주세요<br />" \
                                    "최근 6개월 이내에 사용한 이전의 비밀번호는 개인정보 보호법에 따라 재사용하실수 없습니다<br /><br />" \
                                    "A Power of Trance에서 보낸 이메일인지 어떻게 알 수 있나요?<br />" \
-                                   "본 이메일의 링크는 “https://”로 시작하고 “apoweroftrance.com”을 포함합니다.<br />" \
+                                   "본 이메일의 링크는 “http://”로 시작하고 “apoweroftrance.com”을 포함합니다.<br />" \
                                    "브라우저에 표시된 자물쇠 아이콘을 통해서도 안전한 사이트인지 확인할 수 있습니다.</body></html>"
 
 
