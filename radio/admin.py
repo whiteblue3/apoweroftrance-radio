@@ -20,6 +20,18 @@ from .uploadhandler import ProgressBarUploadHandler
 from django_utils import api
 
 
+class ScaleFilter(InputFilter):
+    parameter_name = 'scale'
+    title = _('Scale')
+
+    def queryset(self, request, queryset):
+        if self.value() is not None:
+            scale = self.value()
+            return queryset.filter(
+                Q(scale__icontains=scale)
+            )
+
+
 class ChannelFilter(admin.SimpleListFilter):
     template = 'admin/dropdown_filter.html'
 
@@ -71,16 +83,18 @@ class TrackAdmin(admin.ModelAdmin):
         'id', 'user_link',
         'format', 'is_service',
         'channel', 'artist', 'title',
+        'bpm', 'scale',
         'duration_field',
         'play_count',
         'queue_in_playlist',
         'uploaded_at', 'updated_at', 'last_played_at',
     )
     search_fields = (
-        'title', 'artist', 'user__email'
+        'title', 'artist', 'bpm', 'scale', 'user__email'
     )
     list_filter = (
         ChannelFilter, ('play_count', RangeNumericFilter),
+        ('bpm', RangeNumericFilter), ScaleFilter,
         PlayedFilter, ('last_played_at', DateTimeRangeFilter),
         ('uploaded_at', DateTimeRangeFilter), ('updated_at', DateTimeRangeFilter),
     )

@@ -17,9 +17,18 @@ class TrackSerializer(serializers.ModelSerializer):
     is_service = serializers.BooleanField(default=True, allow_null=False)
 
     title = serializers.CharField(allow_null=False, allow_blank=False, max_length=100)
-    artist = serializers.CharField(allow_null=False, allow_blank=False, max_length=30)
+    artist = serializers.CharField(allow_null=False, allow_blank=False, max_length=50)
 
     description = serializers.CharField(allow_null=True, allow_blank=True)
+
+    bpm = serializers.FloatField(allow_null=True, default=None)
+    scale = serializers.CharField(allow_null=True, default=None, max_length=15)
+
+    queue_in = serializers.TimeField(allow_null=True, default=None)
+    queue_out = serializers.TimeField(allow_null=True, default=None)
+    mix_in = serializers.TimeField(allow_null=True, default=None)
+    mix_out = serializers.TimeField(allow_null=True, default=None)
+    ment_in = serializers.TimeField(allow_null=True, default=None)
 
     duration = serializers.TimeField(allow_null=False)
     play_count = serializers.IntegerField(default=0, allow_null=False)
@@ -39,6 +48,8 @@ class TrackSerializer(serializers.ModelSerializer):
             'id', 'user', 'user_id',
             'location', 'format', 'is_service',
             'title', 'artist', 'description',
+            'bpm', 'scale',
+            'queue_in', 'queue_out', 'mix_in', 'mix_out', 'ment_in',
             'duration', 'play_count',
             'channel', 'uploaded_at', 'updated_at', 'last_played_at',
         )
@@ -52,6 +63,15 @@ class TrackAPISerializer(serializers.Serializer):
 
     description = serializers.CharField(allow_null=True, allow_blank=True)
 
+    bpm = serializers.FloatField(allow_null=True, default=None)
+    scale = serializers.CharField(allow_null=True, default=None, max_length=15)
+
+    queue_in = serializers.TimeField(allow_null=True, default=None)
+    queue_out = serializers.TimeField(allow_null=True, default=None)
+    mix_in = serializers.TimeField(allow_null=True, default=None)
+    mix_out = serializers.TimeField(allow_null=True, default=None)
+    ment_in = serializers.TimeField(allow_null=True, default=None)
+
     channel = serializers.ListField(
         child=serializers.ChoiceField(choices=CHANNEL, default=DEFAULT_CHANNEL, allow_null=False, allow_blank=False),
         allow_null=False
@@ -62,6 +82,8 @@ class TrackAPISerializer(serializers.Serializer):
         fields = (
             'is_service',
             'title', 'artist', 'description',
+            'bpm', 'scale',
+            'queue_in', 'queue_out', 'mix_in', 'mix_out', 'ment_in',
             'channel',
         )
 

@@ -165,6 +165,20 @@ class UploadAPI(CreateAPIView):
             description="Music Description"
         ),
         openapi.Parameter(
+            name="bpm",
+            in_=openapi.IN_FORM,
+            type=openapi.TYPE_INTEGER,
+            required=False,
+            description="BPM"
+        ),
+        openapi.Parameter(
+            name="scale",
+            in_=openapi.IN_FORM,
+            type=openapi.TYPE_STRING,
+            required=False,
+            description="Music Scale"
+        ),
+        openapi.Parameter(
             name="channel",
             in_=openapi.IN_FORM,
             type=openapi.TYPE_ARRAY,
@@ -219,6 +233,16 @@ class UploadAPI(CreateAPIView):
             description = ""
 
         try:
+            bpm = int(request.data["bpm"])
+        except MultiValueDictKeyError:
+            bpm = None
+
+        try:
+            scale = request.data["scale"]
+        except MultiValueDictKeyError:
+            scale = None
+
+        try:
             channel = request.data["channel"]
         except MultiValueDictKeyError:
             raise ValidationError(_("'channel' is required"))
@@ -268,6 +292,8 @@ class UploadAPI(CreateAPIView):
                     "artist": artist,
                     "title": title,
                     "description": description,
+                    "bpm": bpm,
+                    "scale": scale,
                     "duration": str(timedelta(seconds=float(duration))),
                     "play_count": 0,
                     "channel": channel,

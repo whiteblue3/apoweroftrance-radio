@@ -45,9 +45,18 @@ class Track(models.Model):
     is_service = models.BooleanField(default=True, null=False, blank=False)
 
     title = models.CharField(null=False, blank=False, max_length=100)
-    artist = models.CharField(null=False, blank=False, max_length=30)
+    artist = models.CharField(null=False, blank=False, max_length=50)
 
     description = models.TextField(null=True, blank=True)
+
+    bpm = models.FloatField(null=True, blank=True, default=None)
+    scale = models.CharField(null=True, blank=True, max_length=15, default=None)
+
+    queue_in = models.TimeField(null=True, blank=True, default=None)
+    queue_out = models.TimeField(null=True, blank=True, default=None)
+    mix_in = models.TimeField(null=True, blank=True, default=None)
+    mix_out = models.TimeField(null=True, blank=True, default=None)
+    ment_in = models.TimeField(null=True, blank=True, default=None)
 
     duration = models.TimeField(null=False, blank=False)
     play_count = models.PositiveIntegerField(default=0, null=False, editable=False)
