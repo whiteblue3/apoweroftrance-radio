@@ -165,7 +165,7 @@ class TrackAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
     def process_queuein(self, request, track_id, channel, *args, **kwargs):
-        if not get_is_pending_remove(track_id):
+        if get_is_pending_remove(track_id):
             self.message_user(request, 'You cannot queue-in because the track is reserved pending remove', level=ERROR)
         else:
             redis_data = get_redis_data(channel)
