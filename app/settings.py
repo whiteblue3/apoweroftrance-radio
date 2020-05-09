@@ -290,18 +290,18 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'accounts.backends.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
+        'accounts.backends.JWTAuthentication',
     ),
     'EXCEPTION_HANDLER': 'app.exceptions.core_exception_handler',
 }
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'accounts.backends.JWTAuthentication',
     'rest_framework.authentication.SessionAuthentication',
     'rest_framework.authentication.BasicAuthentication',
+    'django.contrib.auth.backends.ModelBackend',
+    'accounts.backends.JWTAuthentication',
 )
 
 

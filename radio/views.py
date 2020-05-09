@@ -33,7 +33,10 @@ from .serializers import (
     TrackSerializer, TrackAPISerializer, LikeSerializer, LikeAPISerializer,
     PlayQueueSerializer, PlayHistorySerializer
 )
-from .util import now, get_random_track, get_redis_data, set_redis_data, delete_track, NUM_SAMPLES
+from .util import (
+    now, get_random_track, get_redis_data, set_redis_data, delete_track, remove_pending_track, get_is_pending_remove,
+    NUM_SAMPLES
+)
 
 
 @never_cache
@@ -120,6 +123,9 @@ class TrackListAPI(RetrieveAPIView):
         response = []
 
         for track in track_list:
+            is_pending_remove = get_is_pending_remove(track.id)
+            if is_pending_remove:
+                continue
             serializer = TrackSerializer(track)
             response.append(serializer.data)
 
@@ -332,6 +338,10 @@ class TrackAPI(
         except Track.DoesNotExist:
             raise ValidationError(_("Music does not exist"))
 
+        is_pending_remove = get_is_pending_remove(track_id)
+        if is_pending_remove:
+            raise ValidationError(_("You cannot view track information because the track is reserved pending remove"))
+
         serializer = TrackSerializer(track)
 
         return api.response_json(serializer.data, status.HTTP_200_OK)
@@ -350,6 +360,10 @@ class TrackAPI(
             track = Track.objects.get(id=track_id)
         except Track.DoesNotExist:
             raise ValidationError(_("Music does not exist"))
+
+        is_pending_remove = get_is_pending_remove(track_id)
+        if is_pending_remove:
+            raise ValidationError(_("You cannot edit music information because the track is reserved pending remove"))
 
         if track.user.id == user.id:
             serializer = TrackSerializer(track, data=request.data, partial=True)
@@ -374,6 +388,10 @@ class TrackAPI(
             track = Track.objects.get(id=track_id)
         except Track.DoesNotExist:
             raise ValidationError(_("Music does not exist"))
+
+        is_pending_remove = get_is_pending_remove(track_id)
+        if is_pending_remove:
+            raise ValidationError(_("Track is already reserved pending remove"))
 
         if track.user.id == user.id:
             delete_track(track)
@@ -405,6 +423,10 @@ class LikeAPI(CreateAPIView):
             _ = Track.objects.get(id=track_id)
         except Track.DoesNotExist:
             raise ValidationError(_("Music does not exist"))
+
+        is_pending_remove = get_is_pending_remove(track_id)
+        if is_pending_remove:
+            raise ValidationError(_("You can't do it because the track is reserved pending remove"))
 
         try:
             like = Like.objects.get(track_id=track_id, user_id=user.id)
@@ -555,12 +577,17 @@ class PlayQueueResetAPI(RetrieveAPIView):
             location = track.location
             artist = track.artist
             title = track.title
-            response_daemon_data.append({
-                "id": track.id,
-                "location": "/srv/media/%s" % location,
-                "artist": artist,
-                "title": title
-            })
+
+            is_pending_remove = get_is_pending_remove(track.id)
+            if is_pending_remove:
+                continue
+            else:
+                response_daemon_data.append({
+                    "id": track.id,
+                    "location": "/srv/media/%s" % location,
+                    "artist": artist,
+                    "title": title
+                })
 
         response_daemon = {
             "host": "server",
@@ -592,6 +619,10 @@ class QueueINAPI(RetrieveAPIView):
             track = Track.objects.get(id=track_id)
         except Track.DoesNotExist:
             raise ValidationError(_("Music does not exist"))
+
+        is_pending_remove = get_is_pending_remove(track_id)
+        if is_pending_remove:
+            raise ValidationError(_("You cannot queue-in because the track is reserved pending remove"))
 
         redis_data = get_redis_data(channel)
         playlist = redis_data["playlist"]
@@ -767,6 +798,8 @@ class CallbackOnStopAPI(CreateAPIView):
     def post(self, request, channel, *args, **kwargs):
         if channel not in SERVICE_CHANNEL:
             raise ValidationError(_("Invalid service channel"))
+
+        remove_pending_track()
 
         random_tracks = get_random_track(channel, 1)
 

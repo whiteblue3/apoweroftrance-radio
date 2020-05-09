@@ -46,6 +46,67 @@ def set_redis_data(channel, key, value):
     redis_server.set(channel, json.dumps(redis_data, ensure_ascii=False).encode('utf-8'))
 
 
+def get_pending_remove():
+    pending_remove = redis_server.get('pending_remove')
+    if pending_remove is None:
+        default_data = {
+            "list": None
+        }
+        redis_server.set('pending_remove', json.dumps(default_data, ensure_ascii=False).encode('utf-8'))
+    try:
+        data_json = json.loads(pending_remove)
+    except Exception as e:
+        print('redis error: {}'.format(e))
+        return None
+    return dict(data_json)
+
+
+def set_pending_remove(remove_list):
+    pending_remove = get_pending_remove()
+    pending_remove["list"] = remove_list
+    redis_server.set('pending_remove', json.dumps(pending_remove, ensure_ascii=False).encode('utf-8'))
+
+
+def get_is_pending_remove(track_id):
+    pending_remove = get_pending_remove()
+    if pending_remove is None:
+        return False
+    else:
+        pending_remove_list = pending_remove["list"]
+        if pending_remove_list is not None:
+            try:
+                index = pending_remove_list.index(track_id)
+            except ValueError:
+                return False
+            else:
+                return True
+        else:
+            return False
+
+
+def remove_pending_track():
+    from .models import (
+        Track
+    )
+
+    pending_remove = get_pending_remove()
+    if pending_remove is None:
+        pass
+    else:
+        pending_remove_list = pending_remove["list"]
+        if pending_remove_list is not None:
+            while pending_remove_list:
+                track_id = pending_remove_list.pop()
+                try:
+                    track = Track.objects.get(id=track_id)
+                except Track.DoesNotExist:
+                    pass
+                else:
+                    if track:
+                        delete_track(track, force=True)
+        set_pending_remove(pending_remove_list)
+
+
 def get_random_track(channel, samples):
     from .models import (
         Track
@@ -105,7 +166,7 @@ def get_random_track(channel, samples):
     return random_tracks
 
 
-def delete_track(track):
+def delete_track(track, force=False):
     # Remove from playlist
     channel_list = track.channel
     location = track.location
@@ -116,7 +177,19 @@ def delete_track(track):
                 now_playing = redis_data["now_playing"]
 
                 if int(now_playing["id"]) == track.id:
-                    raise ValidationError(_("Music cannot delete because now playing"))
+                    if not force:
+                        pending_remove = get_pending_remove()
+                        pending_remove_list = pending_remove["list"]
+                        if pending_remove_list is None:
+                            pending_remove_list = [track.id]
+                        else:
+                            pending_remove_list.append(track.id)
+                        set_pending_remove(pending_remove_list)
+                        raise ValidationError(_(
+                            "Pending remove reserved for '{0} - {1}' beacuse current playing".format(
+                                track.artist, track.title
+                            )
+                        ))
 
             if redis_data["playlist"]:
                 playlist = redis_data["playlist"]
