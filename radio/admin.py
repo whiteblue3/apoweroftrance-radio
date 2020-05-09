@@ -15,7 +15,7 @@ from admin_numeric_filter.admin import RangeNumericFilter
 from django.contrib.admin.filters import SimpleListFilter
 from .models import Track, PlayHistory, CHANNEL
 from .forms import UploadTrackForm, UpdateTrackForm
-from .util import get_redis_data, set_redis_data, delete_track, get_random_track, NUM_SAMPLES
+from .util import get_redis_data, set_redis_data, delete_track, get_random_track, get_is_pending_remove, NUM_SAMPLES
 from .uploadhandler import ProgressBarUploadHandler
 from django_utils import api
 
@@ -113,6 +113,18 @@ class TrackAdmin(admin.ModelAdmin):
     duration_field.admin_order_field = 'duration'
     duration_field.short_description = 'Duration'
 
+    def has_change_permission(self, request, obj=None):
+        if obj is not None:
+            return not get_is_pending_remove(obj.pk)
+        else:
+            return super().has_change_permission(request, obj=obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is not None:
+            return not get_is_pending_remove(obj.pk)
+        else:
+            return super().has_delete_permission(request, obj=obj)
+
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         extra_context['channels'] = CHANNEL
@@ -153,32 +165,35 @@ class TrackAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
     def process_queuein(self, request, track_id, channel, *args, **kwargs):
-        redis_data = get_redis_data(channel)
-        if not redis_data:
-            self.message_user(request, 'Channel does not exist', level=ERROR)
+        if not get_is_pending_remove(track_id):
+            self.message_user(request, 'You cannot queue-in because the track is reserved pending remove', level=ERROR)
         else:
-            playlist = redis_data["playlist"]
+            redis_data = get_redis_data(channel)
+            if not redis_data:
+                self.message_user(request, 'Channel does not exist', level=ERROR)
+            else:
+                playlist = redis_data["playlist"]
 
-            track = Track.objects.get(id=track_id)
+                track = Track.objects.get(id=track_id)
 
-            new_track = {
-                "id": track.id,
-                "location": "/srv/media/%s" % track.location,
-                "artist": track.artist,
-                "title": track.title
-            }
+                new_track = {
+                    "id": track.id,
+                    "location": "/srv/media/%s" % track.location,
+                    "artist": track.artist,
+                    "title": track.title
+                }
 
-            playlist.append(new_track)
-            set_redis_data(channel, "playlist", playlist)
+                playlist.append(new_track)
+                set_redis_data(channel, "playlist", playlist)
 
-            api.request_async_threaded("POST", settings.MUSICDAEMON_URL, callback=None, data={
-                "host": "server",
-                "target": channel,
-                "command": "setlist",
-                "data": playlist
-            })
+                api.request_async_threaded("POST", settings.MUSICDAEMON_URL, callback=None, data={
+                    "host": "server",
+                    "target": channel,
+                    "command": "setlist",
+                    "data": playlist
+                })
 
-            self.message_user(request, 'Success')
+                self.message_user(request, 'Success')
 
         url = reverse(
             'admin:radio_track_changelist',
@@ -223,12 +238,15 @@ class TrackAdmin(admin.ModelAdmin):
                 location = track.location
                 artist = track.artist
                 title = track.title
-                response_daemon_data.append({
-                    "id": track.id,
-                    "location": "/srv/media/%s" % location,
-                    "artist": artist,
-                    "title": title
-                })
+
+                is_pending_remove = get_is_pending_remove(track.id)
+                if not is_pending_remove:
+                    response_daemon_data.append({
+                        "id": track.id,
+                        "location": "/srv/media/%s" % location,
+                        "artist": artist,
+                        "title": title
+                    })
 
             response_daemon = {
                 "host": "server",
@@ -251,10 +269,12 @@ class TrackAdmin(admin.ModelAdmin):
         html = ''
         args = []
         for in_service_channel, in_service_channel_name in CHANNEL:
-            html += '<a class="button" href="{}">%s</a>&nbsp;' % in_service_channel_name
-            args.append(
-                reverse('admin:track-queuein', args=[obj.pk, in_service_channel, -1]),
-            )
+            is_pending_remove = get_is_pending_remove(obj.pk)
+            if not is_pending_remove:
+                html += '<a class="button" href="{}">%s</a>&nbsp;' % in_service_channel_name
+                args.append(
+                    reverse('admin:track-queuein', args=[obj.pk, in_service_channel, -1]),
+                )
         return format_html(html, *args)
     queue_in_playlist.short_description = 'Queue In'
     queue_in_playlist.allow_tags = True

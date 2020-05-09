@@ -12,7 +12,7 @@ from .models import (
     FORMAT, CHANNEL, SUPPORT_FORMAT, FORMAT_MP3, FORMAT_M4A,
     SERVICE_CHANNEL, Track
 )
-from .util import now
+from .util import now, get_is_pending_remove
 
 
 class UpdateTrackForm(forms.ModelForm):
@@ -34,6 +34,9 @@ class UpdateTrackForm(forms.ModelForm):
                   'queue_in', 'queue_out', 'mix_in', 'mix_out', 'ment_in', 'channel']
 
     def save(self, commit=True):
+        if get_is_pending_remove(self.instance.id):
+            raise ValidationError(_("You cannot change information because the track reserved pending remove"))
+
         artist = self.cleaned_data['artist']
         title = self.cleaned_data['title']
 
@@ -109,6 +112,7 @@ class UploadTrackForm(UpdateTrackForm):
                   'queue_in', 'queue_out', 'mix_in', 'mix_out', 'ment_in', 'channel']
 
     def save(self, commit=True):
+
         f = self.cleaned_data['audio']
         audio_format = self.cleaned_data['format']
 

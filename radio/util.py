@@ -180,16 +180,19 @@ def delete_track(track, force=False):
                     if not force:
                         pending_remove = get_pending_remove()
                         pending_remove_list = pending_remove["list"]
-                        if pending_remove_list is None:
-                            pending_remove_list = [track.id]
+                        if not get_is_pending_remove(track.id):
+                            if pending_remove_list is None:
+                                pending_remove_list = [track.id]
+                            else:
+                                pending_remove_list.append(track.id)
+                            set_pending_remove(pending_remove_list)
+                            raise ValidationError(_(
+                                "Pending remove reserved for '{0} - {1}' beacuse current playing".format(
+                                    track.artist, track.title
+                                )
+                            ))
                         else:
-                            pending_remove_list.append(track.id)
-                        set_pending_remove(pending_remove_list)
-                        raise ValidationError(_(
-                            "Pending remove reserved for '{0} - {1}' beacuse current playing".format(
-                                track.artist, track.title
-                            )
-                        ))
+                            raise ValidationError(_("Already pending remove reserved"))
 
             if redis_data["playlist"]:
                 playlist = redis_data["playlist"]
