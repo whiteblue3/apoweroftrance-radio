@@ -139,7 +139,9 @@ def get_random_track(channel, samples):
     # According to International Radio Law, Once played track cannot restream in 3 hours
     now = datetime.now(tz=tzlocal())
     delta_3hour = timedelta(hours=3)
+    delta_10minute = timedelta(minutes=10)
     base_time = now - delta_3hour
+    after_10minute = now - delta_10minute
 
     filters = Q(channel__icontains=channel)
 
@@ -152,7 +154,7 @@ def get_random_track(channel, samples):
         filters = filters and ~Q(id=last_play_track_id)
 
     tracks = Track.objects.filter(
-        (Q(last_played_at__lt=base_time) | Q(last_played_at=None)) and filters)
+        (Q(last_played_at__lt=base_time) | Q(last_played_at=None, uploaded_at__gt=after_10minute)) and filters)
 
     if tracks.count() < 1:
         # If service music is too few, ignore International Radio Law.

@@ -16,11 +16,11 @@ from .util import now, get_is_pending_remove
 
 
 class UpdateTrackForm(forms.ModelForm):
-    artist = forms.CharField(required=True)
-    title = forms.CharField(required=True)
+    artist = forms.CharField(required=True, max_length=70)
+    title = forms.CharField(required=True, max_length=200)
     description = forms.Textarea()
     bpm = forms.IntegerField(required=False)
-    scale = forms.CharField(required=False)
+    scale = forms.CharField(required=False, max_length=15)
     queue_in = forms.TimeField(required=False)
     queue_out = forms.TimeField(required=False)
     mix_in = forms.TimeField(required=False)

@@ -44,8 +44,8 @@ class Track(models.Model):
     format = models.CharField(choices=FORMAT, default=DEFAULT_FORMAT, null=False, blank=False, max_length=3)
     is_service = models.BooleanField(default=True, null=False, blank=False)
 
-    title = models.CharField(null=False, blank=False, max_length=100)
-    artist = models.CharField(null=False, blank=False, max_length=50)
+    title = models.CharField(null=False, blank=False, max_length=200)
+    artist = models.CharField(null=False, blank=False, max_length=70)
 
     description = models.TextField(null=True, blank=True)
 
@@ -109,8 +109,8 @@ class PlayHistory(models.Model):
         'radio.Track', on_delete=models.SET_NULL, null=True, editable=False
     )
 
-    title = models.CharField(null=True, blank=True, max_length=100, editable=False)
-    artist = models.CharField(null=True, blank=True, max_length=30, editable=False)
+    title = models.CharField(null=True, blank=True, max_length=200, editable=False)
+    artist = models.CharField(null=True, blank=True, max_length=70, editable=False)
 
     channel = models.CharField(
         choices=CHANNEL, default=DEFAULT_CHANNEL, null=False, blank=False, max_length=15, editable=False

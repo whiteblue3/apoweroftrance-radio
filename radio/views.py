@@ -228,10 +228,16 @@ class UploadAPI(CreateAPIView):
         except MultiValueDictKeyError:
             raise ValidationError(_("'artist' is required"))
 
+        if len(artist) > 70:
+            raise ValidationError(_("'artist' size is under 70"))
+
         try:
             title = request.data["title"]
         except MultiValueDictKeyError:
             raise ValidationError(_("'title' is required"))
+
+        if len(title) > 200:
+            raise ValidationError(_("'title' size is under 200"))
 
         try:
             description = request.data["description"]
@@ -247,6 +253,9 @@ class UploadAPI(CreateAPIView):
             scale = request.data["scale"]
         except MultiValueDictKeyError:
             scale = None
+
+        if len(scale) > 15:
+            raise ValidationError(_("'scale' size is under 15"))
 
         try:
             channel = request.data["channel"]

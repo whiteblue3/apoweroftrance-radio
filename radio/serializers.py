@@ -16,8 +16,8 @@ class TrackSerializer(serializers.ModelSerializer):
     format = serializers.ChoiceField(choices=FORMAT, default=DEFAULT_FORMAT, allow_null=False, allow_blank=False)
     is_service = serializers.BooleanField(default=True, allow_null=False)
 
-    title = serializers.CharField(allow_null=False, allow_blank=False, max_length=100)
-    artist = serializers.CharField(allow_null=False, allow_blank=False, max_length=50)
+    title = serializers.CharField(allow_null=False, allow_blank=False, max_length=200)
+    artist = serializers.CharField(allow_null=False, allow_blank=False, max_length=70)
 
     description = serializers.CharField(allow_null=True, allow_blank=True)
 
@@ -58,8 +58,8 @@ class TrackSerializer(serializers.ModelSerializer):
 class TrackAPISerializer(serializers.Serializer):
     is_service = serializers.BooleanField(default=True, allow_null=False)
 
-    title = serializers.CharField(allow_null=False, allow_blank=False, max_length=100)
-    artist = serializers.CharField(allow_null=False, allow_blank=False, max_length=30)
+    title = serializers.CharField(allow_null=False, allow_blank=False, max_length=200)
+    artist = serializers.CharField(allow_null=False, allow_blank=False, max_length=70)
 
     description = serializers.CharField(allow_null=True, allow_blank=True)
 
@@ -139,8 +139,8 @@ class PlayHistorySerializer(serializers.ModelSerializer):
     track = TrackSerializer(read_only=True)
     track_id = serializers.IntegerField(write_only=True)
 
-    title = serializers.CharField(allow_null=True, allow_blank=True, max_length=100)
-    artist = serializers.CharField(allow_null=True, allow_blank=True, max_length=30)
+    title = serializers.CharField(allow_null=True, allow_blank=True, max_length=200)
+    artist = serializers.CharField(allow_null=True, allow_blank=True, max_length=70)
 
     channel = serializers.ChoiceField(
         choices=CHANNEL, default=DEFAULT_CHANNEL, allow_null=False
@@ -159,8 +159,8 @@ class PlayQueueSerializer(serializers.Serializer):
     id = serializers.IntegerField()
 
     location = serializers.CharField(allow_null=True, allow_blank=True, max_length=255)
-    title = serializers.CharField(allow_null=True, allow_blank=True, max_length=100)
-    artist = serializers.CharField(allow_null=True, allow_blank=True, max_length=30)
+    title = serializers.CharField(allow_null=True, allow_blank=True, max_length=200)
+    artist = serializers.CharField(allow_null=True, allow_blank=True, max_length=70)
 
     class Meta:
         fields = (
