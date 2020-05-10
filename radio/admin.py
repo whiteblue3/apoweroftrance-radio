@@ -15,7 +15,10 @@ from admin_numeric_filter.admin import RangeNumericFilter
 from django.contrib.admin.filters import SimpleListFilter
 from .models import Track, PlayHistory, CHANNEL
 from .forms import UploadTrackForm, UpdateTrackForm
-from .util import get_redis_data, set_redis_data, delete_track, get_random_track, get_is_pending_remove, NUM_SAMPLES
+from .util import (
+    get_redis_data, set_redis_data, delete_track, get_random_track,
+    get_is_pending_remove, get_pending_remove, set_pending_remove, NUM_SAMPLES
+)
 from .uploadhandler import ProgressBarUploadHandler
 from django_utils import api
 
@@ -86,7 +89,7 @@ class TrackAdmin(admin.ModelAdmin):
         'bpm', 'scale',
         'duration_field',
         'play_count',
-        'queue_in_playlist',
+        'queue_in_playlist', 'pending_delete_cancel',
         'uploaded_at', 'updated_at', 'last_played_at',
     )
     search_fields = (
@@ -161,10 +164,15 @@ class TrackAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.process_reset),
                 name='track-reset',
             ),
+            re_path(
+                r'^(?P<track_id>.+)/pending/delete/cancel$',
+                self.admin_site.admin_view(self.process_cancel_pending_delete),
+                name='pending-delete-cancel',
+            ),
         ]
         return custom_urls + urls
 
-    def process_queuein(self, request, track_id, channel, *args, **kwargs):
+    def process_queuein(self, request, track_id, channel, index, *args, **kwargs):
         if get_is_pending_remove(track_id):
             self.message_user(request, 'You cannot queue-in because the track is reserved pending remove', level=ERROR)
         else:
@@ -265,6 +273,26 @@ class TrackAdmin(admin.ModelAdmin):
         )
         return HttpResponseRedirect(url)
 
+    def process_cancel_pending_delete(self, request, track_id, *args, **kwargs):
+        if get_is_pending_remove(int(track_id)):
+            pending_remove = get_pending_remove()
+            pending_remove_list = pending_remove["list"]
+            try:
+                index = pending_remove_list.index(int(track_id))
+            except ValueError:
+                self.message_user(request, 'Track is not pending remove', level=ERROR)
+            else:
+                pending_remove_list.pop(index)
+            set_pending_remove(pending_remove_list)
+            self.message_user(request, 'Success')
+        else:
+            self.message_user(request, 'Track is not pending remove', level=ERROR)
+        url = reverse(
+            'admin:radio_track_changelist',
+            current_app=self.admin_site.name,
+        )
+        return HttpResponseRedirect(url)
+
     def queue_in_playlist(self, obj):
         html = ''
         args = []
@@ -278,6 +306,19 @@ class TrackAdmin(admin.ModelAdmin):
         return format_html(html, *args)
     queue_in_playlist.short_description = 'Queue In'
     queue_in_playlist.allow_tags = True
+
+    def pending_delete_cancel(self, obj):
+        html = ''
+        args = []
+        is_pending_remove = get_is_pending_remove(obj.pk)
+        if is_pending_remove:
+            html += '<a class="button" href="{}">Cancel</a>&nbsp;'
+            args.append(
+                reverse('admin:pending-delete-cancel', args=[obj.pk]),
+            )
+        return format_html(html, *args)
+    pending_delete_cancel.short_description = 'Pending Delete'
+    pending_delete_cancel.allow_tags = True
 
     def delete_queryset(self, request, queryset):
         print('========================delete_queryset========================')
