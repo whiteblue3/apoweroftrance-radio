@@ -102,7 +102,8 @@ MAINTAINER @whiteblue3 https://github.com/whiteblue3
 COPY . /backend/
 RUN chown -R ${USER}:${USER} /backend
 RUN rm requirement.txt && rm Dockerfile && rm build_push_docker_image.sh && rm -rf .git && rm -rf .gitignore \
-    && rm apoweroftrance-django-utils-0.0.1.tar.gz && rm apoweroftrance-account-0.0.1.tar.gz
+    && rm apoweroftrance-django-utils-0.0.1.tar.gz && rm apoweroftrance-account-0.0.1.tar.gz \
+    && rm -rf apoweroftrance_radio.egg-info && rm -rf build && rm -rf dist
 
 
 USER ${USER}
