@@ -364,23 +364,6 @@ GS_BUCKET_NAME = secret['GS_BUCKET_NAME']
 STATIC_URL = "https://storage.cloud.google.com/%s/" % GS_BUCKET_NAME
 
 
-#####################
-# File Upload Setup #
-#####################
-
-FILE_UPLOAD_PERMISSIONS = 0o777
-FILE_UPLOAD_MAX_MEMORY_SIZE = 51200000
-DATA_UPLOAD_MAX_MEMORY_SIZE = 51200000
-
-STORAGE_DRIVER = "gcs"
-
-FILE_UPLOAD_HANDLERS = (
-    "radio.uploadhandler.ProgressBarUploadHandler",
-    "django.core.files.uploadhandler.MemoryFileUploadHandler",
-    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
-)
-
-
 #############
 # AES Setup #
 #############
@@ -389,119 +372,13 @@ AES_KEY = secret['AES_KEY']
 AES_SECRET = secret['AES_SECRET']
 
 
-###############
-# Email Setup #
-###############
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = secret['EMAIL_HOST_USER']
-EMAIL_HOST_PASSWORD = secret['EMAIL_HOST_PASSWORD']
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-SERVER_EMAIL = EMAIL_HOST_USER
-
-
 #################
 # Account Setup #
 #################
 
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-# ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS =1
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-# ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-# ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
-# ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 86400 # 1 day in seconds
-# ACCOUNT_LOGOUT_REDIRECT_URL = '/'
-
 AUTH_DOMAIN_URL = "127.0.0.1:8081"
 ACCOUNT_API_PATH = "/v1/user"
-
-
-ACTIVATE_ACCOUNT_EMAIL_TITLE = "회원가입 이메일 인증 안내"
-ACTIVATE_ACCOUNT_EMAIL_BODY = "안녕하세요.\n" \
-                              "\n" \
-                              "A Power of Trance 의 회원이 되신 것을 진심으로 축하드립니다\n" \
-                              "아래 링크를 클릭하면 회원가입 인증이 완료됩니다\n" \
-                              "\n" \
-                              "%s\n" \
-                              "\n" \
-                              "감사합니다\n"
-ACTIVATE_ACCOUNT_EMAIL_HTML = "<!DOCTYPE html><html lang='kr'><body>안녕하세요.<br />" \
-                              "<br />" \
-                              "A Power of Trance 의 회원이 되신 것을 진심으로 축하드립니다<br />" \
-                              "아래 링크를 클릭하면 회원가입 인증이 완료됩니다<br />" \
-                              "<br />" \
-                              "<a href='%s' target='_blank'>회원가입 완료하기</a><br />" \
-                              "감사합니다</body></html>"
-
-RESET_PASSWORD_EMAIL_TITLE = "비밀번호 재설정 안내"
-RESET_PASSWORD_EMAIL_BODY = "회원님 안녕하세요.\n" \
-                            "\n" \
-                            "비밀번호 재설정을 요청하셨습니다.\n" \
-                            "임시 비밀번호는 %s 입니다\n" \
-                            "아래의 링크를 눌러 비밀번호를 재설정을 완료하세요.\n" \
-                            "\n" \
-                            "%s\n" \
-                            "\n" \
-                            "※ 회원님께서 위의 링크를 클릭하지 않으면 임시비밀번호는 최종 변경되지 않습니다.\n" \
-                            "※ 회원님께서 재설정 요청을 하지 않은 경우 아무런 조치를 취하실 필요가 없습니다.\n" \
-                            "※ 해당 메일은 답장 하실 수 없습니다. 궁금한 점이 있다면, 아래로 문의해 주시기 바랍니다.\n" \
-                            "- 문의 메일 : apoweroftrance@gmail.com\n" \
-                            "\n" \
-                            "감사합니다\n"
-RESET_PASSWORD_EMAIL_HTML = "<!DOCTYPE html><html lang='kr'><body>회원님 안녕하세요.<br />" \
-                            "<br />" \
-                            "비밀번호 재설정을 요청하셨습니다.<br />" \
-                            "임시 비밀번호는 %s 입니다<br />" \
-                            "아래의 링크를 눌러 비밀번호를 재설정하세요.<br />" \
-                            "<br />" \
-                            "<a href='%s' target='_blank'>비밀번호 재설정하기</a><br />" \
-                            "<br />" \
-                            "※ 회원님께서 위의 링크를 클릭하지 않으면 임시비밀번호는 최종 변경되지 않습니다.<br />" \
-                            "※ 회원님께서 재설정 요청을 하지 않은 경우 아무런 조치를 취하실 필요가 없습니다.<br />" \
-                            "※ 해당 메일은 답장 하실 수 없습니다. 궁금한 점이 있다면, 아래로 문의해 주시기 바랍니다.<br />" \
-                            "- 문의 메일 : apoweroftrance@gmail.com<br />" \
-                            "<br />" \
-                            "<br />" \
-                            "감사합니다</body></html>"
-
-NOTIFY_SECURITY_ALERT_EMAIL_TITLE = "신규 로그인 알림"
-NOTIFY_SECURITY_ALERT_EMAIL_BODY = "새로운 디바이스에서 계정에 로그인되었습니다. 본인이 로그인한 것이 맞나요?\n" \
-                                   "*위치는 로그인 IP 주소를 기준으로 한 근접한 위치입니다.\n\n" \
-                                   "본인이 맞는 경우,\n" \
-                                   "이 메시지를 무시하셔도 됩니다. 별도로 취해야 할 조치는 없습니다.\n\n" \
-                                   "본인이 아닌 경우,\n" \
-                                   "계정이 해킹되었을 수 있으며, 계정 보안을 위해 몇 가지 조치를 취해야 합니다. \n" \
-                                   "조치를 취해주세요 -> %s\n" \
-                                   "보다 안전한 조치를 위해 빠르게 임시비밀번호로 변경하시는 것이 좋습니다\n" \
-                                   "비밀번호 변경: %s\n" \
-                                   "위의 링크를 클릭하여 임시비밀번호로 변경하신 후에는 반드시 비밀번호를 원하는 비밀번호로 변경해주세요\n" \
-                                   "최근 6개월 이내에 사용한 이전의 비밀번호는 개인정보 보호법에 따라 재사용하실수 없습니다\n\n" \
-                                   "A Power of Trance에서 보낸 이메일인지 어떻게 알 수 있나요?\n" \
-                                   "본 이메일의 링크는 “https://”로 시작하고 “apoweroftrance.com”을 포함합니다.\n" \
-                                   "브라우저에 표시된 자물쇠 아이콘을 통해서도 안전한 사이트인지 확인할 수 있습니다."
-
-NOTIFY_SECURITY_ALERT_EMAIL_HTML = "<!DOCTYPE html><html lang='kr'><body>" \
-                                   "새로운 디바이스에서 계정에 로그인되었습니다. 본인이 로그인한 것이 맞나요?<br />" \
-                                   "*위치는 로그인 IP 주소를 기준으로 한 근접한 위치입니다.<br /><br />" \
-                                   "본인이 맞는 경우,<br />" \
-                                   "이 메시지를 무시하셔도 됩니다. 별도로 취해야 할 조치는 없습니다.<br /><br />" \
-                                   "본인이 아닌 경우,<br />" \
-                                   "계정이 해킹되었을 수 있으며, 계정 보안을 위해 몇 가지 조치를 취해야 합니다. " \
-                                   "시작하려면 지금 비밀번호를 재설정하세요.<br />" \
-                                   "<a href='%s' target='_blank'>조치를 취해주세요</a><br /><br />" \
-                                   "보다 안전한 조치를 위해 빠르게 임시비밀번호로 변경하시는 것이 좋습니다<br />" \
-                                   "<a href='%s' target='_blank'>비밀번호 변경</a><br />" \
-                                   "위의 링크를 클릭하여 임시비밀번호로 변경하신 후에는 반드시 비밀번호를 원하는 비밀번호로 변경해주세요<br />" \
-                                   "최근 6개월 이내에 사용한 이전의 비밀번호는 개인정보 보호법에 따라 재사용하실수 없습니다<br /><br />" \
-                                   "A Power of Trance에서 보낸 이메일인지 어떻게 알 수 있나요?<br />" \
-                                   "본 이메일의 링크는 “http://”로 시작하고 “apoweroftrance.com”을 포함합니다.<br />" \
-                                   "브라우저에 표시된 자물쇠 아이콘을 통해서도 안전한 사이트인지 확인할 수 있습니다.</body></html>"
+from accounts.email_setup import *
 
 
 ###############
