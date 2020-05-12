@@ -13,3 +13,5 @@ You must define secret.json for security
 - GCP_STORAGE_BUCKET_NAME: bucket name of google cloud storage for media
 - GS_BUCKET_NAME: bucket name of google cloud storage for static
 
+# TODO
+- [x] Get My Track

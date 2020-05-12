@@ -126,6 +126,36 @@ class TrackListAPI(RetrieveAPIView):
         return api.response_json(response, status.HTTP_200_OK)
 
 
+class MyTrackAPI(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (JSONRenderer,)
+    serializer_class = TrackSerializer
+
+    @swagger_auto_schema(
+        operation_summary="View my music list",
+        operation_description="Authenticate Required.",
+        responses={'200': TrackSerializer})
+    @transaction.atomic
+    @method_decorator(ensure_csrf_cookie)
+    @method_permission_classes((AllowAny,))
+    def get(self, request, *args, **kwargs):
+        tracks = Track.objects.filter(user__id=request.user.id)
+
+        response = []
+        for track in tracks:
+            serializer = self.serializer_class(track)
+            data = serializer.data
+            is_pending_remove = get_is_pending_remove(track.id)
+            if not is_pending_remove:
+                response.append(data)
+            response.append(data)
+
+        return api.response_json(response, status.HTTP_200_OK)
+
+
 class TrackAPI(
     mixins.ListModelMixin,
     mixins.UpdateModelMixin,

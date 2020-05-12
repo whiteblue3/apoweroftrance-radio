@@ -6,6 +6,7 @@ app_name = 'radio'
 
 urlpatterns = [
     path('list', views.TrackListAPI.as_view()),
+    path('mytrack', views.MyTrackAPI.as_view()),
     path('track/<int:track_id>', views.TrackAPI.as_view()),
     path('like/<int:track_id>', views.LikeAPI.as_view()),
     path('channelname/<str:channel>', views.ChannelNameAPI.as_view()),

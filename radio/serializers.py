@@ -51,7 +51,7 @@ class TrackSerializer(serializers.ModelSerializer):
             'bpm', 'scale',
             'queue_in', 'queue_out', 'mix_in', 'mix_out', 'ment_in',
             'duration', 'play_count',
-            'channel', 'uploaded_at', 'updated_at', 'last_played_at',
+            'channel', 'uploaded_at', 'updated_at', 'last_played_at'
         )
 
 
