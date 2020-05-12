@@ -112,9 +112,21 @@ def get_random_track(channel, samples):
         Track
     )
 
+    # According to International Radio Law, Once played track cannot restream in 3 hours
+    now = datetime.now(tz=tzlocal())
+    delta_3hour = timedelta(hours=3)
+    delta_10minute = timedelta(minutes=10)
+    base_time = now - delta_3hour
+    after_10minute = now - delta_10minute
+
+    filter_channel = Q(channel__icontains=channel)
+    filter_track = Q(last_played_at__gt=base_time)
+    filter_track_not_play = Q(last_played_at=None, uploaded_at__lt=after_10minute)
+    queryset = Track.objects.filter(filter_channel).filter(filter_track | filter_track_not_play)
+
     # Remove last played track from queue
     now_play_track_id = None
-    last_play_track_id = None
+    playlist = None
     try:
         redis_data = get_redis_data(channel)
         now_playing = redis_data["now_playing"]
@@ -128,33 +140,13 @@ def get_random_track(channel, samples):
         except KeyError:
             pass
 
-        try:
-            if playlist:
-                last_play_track_id = playlist[-1]["id"]
-        except KeyError:
-            pass
-        except IndexError:
-            pass
-
-    # According to International Radio Law, Once played track cannot restream in 3 hours
-    now = datetime.now(tz=tzlocal())
-    delta_3hour = timedelta(hours=3)
-    delta_10minute = timedelta(minutes=10)
-    base_time = now - delta_3hour
-    after_10minute = now - delta_10minute
-
-    filter_channel = Q(channel__icontains=channel)
-    filter_track = Q(last_played_at__gt=base_time)
-    filter_track_not_play = Q(last_played_at=None, uploaded_at__lt=after_10minute)
-    queryset = Track.objects.filter(filter_channel).filter(filter_track | filter_track_not_play)
-
     # Except now playing
     if now_play_track_id is not None:
         queryset = queryset.filter(~Q(id=now_play_track_id))
 
     # Except last play
-    if last_play_track_id is not None and now_play_track_id != last_play_track_id:
-        queryset = queryset.filter(~Q(id=last_play_track_id))
+    for track in playlist:
+        queryset = queryset.filter(~Q(id=track["id"]))
 
     if queryset.count() < 1:
         # If service music is too few, ignore International Radio Law.
