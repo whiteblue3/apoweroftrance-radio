@@ -143,27 +143,27 @@ def get_random_track(channel, samples):
     base_time = now - delta_3hour
     after_10minute = now - delta_10minute
 
-    filters = Q(channel__icontains=channel)
+    filter_channel = Q(channel__icontains=channel)
+    filter_track = Q(last_played_at__gt=base_time)
+    filter_track_not_play = Q(last_played_at=None, uploaded_at__lt=after_10minute)
+    queryset = Track.objects.filter(filter_channel).filter(filter_track | filter_track_not_play)
 
     # Except now playing
     if now_play_track_id is not None:
-        filters = filters and ~Q(id=now_play_track_id)
+        queryset = queryset.filter(~Q(id=now_play_track_id))
 
     # Except last play
     if last_play_track_id is not None and now_play_track_id != last_play_track_id:
-        filters = filters and ~Q(id=last_play_track_id)
+        queryset = queryset.filter(~Q(id=last_play_track_id))
 
-    tracks = Track.objects.filter(
-        (Q(last_played_at__lt=base_time) | Q(last_played_at=None, uploaded_at__gt=after_10minute)) and filters)
-
-    if tracks.count() < 1:
+    if queryset.count() < 1:
         # If service music is too few, ignore International Radio Law.
-        tracks = Track.objects.filter(filters)
+        queryset = Track.objects.filter(filter_channel)
 
-    count_track = tracks.count()
+    count_track = queryset.count()
     if count_track > samples:
         count_track = samples
-    random_tracks = random.sample(list(tracks), count_track)
+    random_tracks = random.sample(list(queryset), count_track)
 
     return random_tracks
 
