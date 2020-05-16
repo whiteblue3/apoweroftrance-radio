@@ -120,8 +120,8 @@ def get_random_track(channel, samples):
     after_10minute = now - delta_10minute
 
     filter_channel = Q(channel__icontains=channel)
-    filter_track = Q(last_played_at__gt=base_time)
-    filter_track_not_play = Q(last_played_at=None, uploaded_at__lt=after_10minute)
+    filter_track = Q(last_played_at__lt=base_time)
+    filter_track_not_play = Q(last_played_at__isnull=True, uploaded_at__lt=after_10minute)
     queryset = Track.objects.filter(filter_channel).filter(filter_track | filter_track_not_play)
 
     # Remove last played track from queue
