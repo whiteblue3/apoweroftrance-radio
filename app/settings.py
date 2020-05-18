@@ -59,6 +59,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'drf_yasg',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,7 @@ MIDDLEWARE = [
     'drf_yasg.middleware.SwaggerExceptionMiddleware',
     'app.remove_next_middleware.RemoveNextMiddleware',
     'app.json404_middleware.JSON404Middleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -388,3 +390,10 @@ from accounts.email_setup import *
 
 MUSICDAEMON_URL = "http://10.0.0.3:9000"
 
+
+##############
+# CORS Setup #
+##############
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
