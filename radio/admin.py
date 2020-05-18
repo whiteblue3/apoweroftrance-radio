@@ -24,6 +24,8 @@ from django_utils import api
 
 
 class ScaleFilter(InputFilter):
+    template = 'accounts/input_filter.html'
+
     parameter_name = 'scale'
     title = _('Scale')
 
@@ -36,7 +38,7 @@ class ScaleFilter(InputFilter):
 
 
 class ChannelFilter(admin.SimpleListFilter):
-    template = 'admin/dropdown_filter.html'
+    template = 'accounts/dropdown_filter.html'
 
     parameter_name = 'channel'
     title = _('Service Channel')
