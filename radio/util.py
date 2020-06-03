@@ -145,8 +145,9 @@ def get_random_track(channel, samples):
         queryset = queryset.filter(~Q(id=now_play_track_id))
 
     # Except last play
-    for track in playlist:
-        queryset = queryset.filter(~Q(id=track["id"]))
+    if playlist is not None:
+        for track in playlist:
+            queryset = queryset.filter(~Q(id=track["id"]))
 
     if queryset.count() < 1:
         # If service music is too few, ignore International Radio Law.
